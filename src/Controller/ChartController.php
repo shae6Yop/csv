@@ -5,9 +5,19 @@ namespace App\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Doctrine\Common\Persistence\ObjectManager;
+use App\Entity\Person;
 
 class ChartController extends AbstractController
 {
+
+    private $manager;
+
+    public function __construct(ObjectManager $manager)
+    {
+        $this->manager = $manager;
+    }
+
     /**
      * @Route("/", name="chart")
      */
@@ -19,13 +29,19 @@ class ChartController extends AbstractController
     /**
      * @Route("/json/chart", name="json_chart")
      */
-    public function chartApi()
+    public function chartApiFromCsv()
     {
         $rawChartData = file_get_contents('../MOCK_DATA.csv');
 
-         $jsonChartData = $this->makeChartJson($rawChartData);
+        $jsonChartData = $this->makeChartJson($rawChartData);
 
-        return new JsonResponse(["message" => $jsonChartData]);
+        if (sizeof($this->manager->getRepository(Person::class)->findAll()) == 0) {
+            $this->importCsvPersons($rawChartData, true);
+        }
+
+        $jsonPersonsInEachCountryData = $this->makePersonsByCountryChartJson($jsonChartData);
+
+        return new JsonResponse(["message" => $jsonPersonsInEachCountryData]);
     }
 
     /**
@@ -59,11 +75,36 @@ class ChartController extends AbstractController
     }
 
     /**
-     * Import csv data into the database
+     * Return json data with person count by country from a json person array
      */
-    private function importCsvObjects($rawData)
+    private function makePersonsByCountryChartJson($jsonArray)
     {
-        $sqlArray = [];
+        /* Isolate unique countries */
+        $uniqueCountries = [];
+        foreach ($jsonArray as $person) {
+            $country = $person->country;
+            if (in_array($country, $uniqueCountries) == false) {
+                array_push($uniqueCountries, $country);
+            }
+        }
+
+        $personsInEachCountryArray = [];
+        foreach ($uniqueCountries as $country) {
+            $countryPersonCount = sizeof($this->manager->getRepository(Person::class)->findBy(["country" => $country]));
+            array_push($personsInEachCountryArray, (object) ["country" => $country, "count" => $countryPersonCount]);
+        }
+
+        return $personsInEachCountryArray;
+    }
+
+    /**
+     * csv2person
+     * insert = true to insert into database
+     * otherwise only return array of Persons
+     */
+    private function importCsvPersons($rawData, $insert = false)
+    {
+        $persons = [];
 
         /* Create an array of Persons */
         foreach (explode("\n", $rawData) as $line) {
@@ -73,17 +114,23 @@ class ChartController extends AbstractController
 
             if ($lineData[0] == "id") continue;
 
-            $currentObj = new Person(
-                /*firstName*/$lineData[1],
-                /*lastName*/ $lineData[2],
-                /*email*/    $lineData[3],
-                /*gender*/   $lineData[4],
-                /*Country*/  $lineData[5]
-            );
+            $currentObj = new Person();
+            $currentObj->setFirstName($lineData[1]);
+            $currentObj->setLastName($lineData[2]);
+            $currentObj->setEmail($lineData[3]);
+            $currentObj->setGender($lineData[4]);
+            $currentObj->setCountry($lineData[5]);
 
-            array_push($jsonArray, $currentObj);
+            array_push($persons, $currentObj);
         }
 
-        return $jsonArray;
+        if ($insert === true) {
+            foreach ($persons as $p) {
+                $this->manager->persist($p);
+                $this->manager->flush();
+            }
+        }
+
+        return $persons;
     }
 }
