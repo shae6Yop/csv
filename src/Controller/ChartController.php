@@ -27,6 +27,8 @@ class ChartController extends AbstractController
 
         /* Create an array of objects */
         foreach (explode("\n", $rawChartData) as $line) {
+            if ($line == "") break;
+
             $lineData = explode(",", $line);
 
             $currentObj = (object) [
