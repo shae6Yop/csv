@@ -10,9 +10,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "chart.js": "^2.8.0"
+    "chart.js": "^2.8.0",
+    "moment": "^2.24.0"
   },
   "devDependencies": {
-    "@symfony/webpack-encore": "^0.27.0"
+    "@symfony/webpack-encore": "^0.27.0",
+    "webpack-notifier": "^1.7.0"
   }
 }
