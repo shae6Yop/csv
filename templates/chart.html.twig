@@ -7,23 +7,32 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
 <script>
 var ctx = document.getElementById('myChart').getContext('2d');
+var countriesData = []
+
+fetch(window.location.origin+"/json/chart")
+.then(response => response.json())
+  .then(jsonData => {
+
 var chart = new Chart(ctx, {
     // The type of chart we want to create
-    type: 'line',
+    type: 'bar',
 
     // The data for our dataset
     data: {
-        labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+      labels: jsonData.message.map(item => item.country),
         datasets: [{
-            label: 'My First dataset',
+            label: 'Persons in a country',
             backgroundColor: 'rgb(255, 99, 132)',
             borderColor: 'rgb(255, 99, 132)',
-            data: [0, 10, 5, 2, 20, 30, 45]
+            data: jsonData.message.map(item => item.count)
         }]
     },
 
     // Configuration options go here
     options: {}
 });
+
+  })
+
 </script>
 {% endblock %}
