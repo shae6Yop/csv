@@ -127,8 +127,9 @@ class ChartController extends AbstractController
         if ($insert === true) {
             foreach ($persons as $p) {
                 $this->manager->persist($p);
-                $this->manager->flush();
             }
+
+            $this->manager->flush();
         }
 
         return $persons;

@@ -3,6 +3,7 @@
 {% block title %}Chart{% endblock %}
 
 {% block body %}
+<span id="loading">Loading data... please wait</span>
 <canvas id="myChart"></canvas>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
 <script>
@@ -32,7 +33,9 @@ var chart = new Chart(ctx, {
     options: {}
 });
 
-  })
+}).then(() => {
+  document.getElementById("loading").innerHTML = ""
+})
 
 </script>
 {% endblock %}
