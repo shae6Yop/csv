@@ -57,4 +57,33 @@ class ChartController extends AbstractController
 
         return $jsonArray;
     }
+
+    /**
+     * Import csv data into the database
+     */
+    private function importCsvObjects($rawData)
+    {
+        $sqlArray = [];
+
+        /* Create an array of Persons */
+        foreach (explode("\n", $rawData) as $line) {
+            if ($line == "") break;
+
+            $lineData = explode(",", $line);
+
+            if ($lineData[0] == "id") continue;
+
+            $currentObj = new Person(
+                /*firstName*/$lineData[1],
+                /*lastName*/ $lineData[2],
+                /*email*/    $lineData[3],
+                /*gender*/   $lineData[4],
+                /*Country*/  $lineData[5]
+            );
+
+            array_push($jsonArray, $currentObj);
+        }
+
+        return $jsonArray;
+    }
 }
