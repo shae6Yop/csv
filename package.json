@@ -11,7 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "chart.js": "^2.8.0",
-    "moment": "^2.24.0"
+    "moment": "^2.29.4"
   },
   "devDependencies": {
     "@symfony/webpack-encore": "^0.27.0",
