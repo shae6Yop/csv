@@ -14,7 +14,7 @@
     "moment": "^2.24.0"
   },
   "devDependencies": {
-    "@symfony/webpack-encore": "^0.27.0",
+    "@symfony/webpack-encore": "^4.1.1",
     "webpack-notifier": "^1.7.0"
   }
 }
